@@ -1,0 +1,14 @@
+﻿KEY;en_US;pl_PL;de_DE;fr_FR;es_ES;zh_CN;ar_SA
+label_bushing;Bushing:;Tuleja:;Buchse:;Douille:;Casquillo:;衬套:;جلبة:
+radius;Diameter (Fi);Średnica (Fi);Durchmesser;Diamètre (Fi);Diámetro (Fi);直径 (Fi);القطر (Fi)
+height;Height;Wysokość;Höhe;Hauteur;Altura;高度;الارتفاع
+thickness;Thickness;Grubość;Dicke;Épaisseur;Espesor;厚度;السماكة
+segments;Smoothness;Gładkość;Glätte;Lissage;Suavizado;平滑度;النعومة
+label_thread;Thread:;Gwint:;Gewinde:;Filetage:;Rosca:;螺纹:;لولب:
+thread_size;Thread Size;Wielkość Zęba;Zahngröße;Taille du filet;Tamaño de rosca;螺纹尺寸;حجم السن
+thread_pitch;Pitch;Skok (Pitch);Steigung;Pas de vis;Paso;螺距;الخطوة
+clearance;Clearance;Luz;Spiel;Jeu;Holgura;间隙;خلوص
+label_washer;Washer:;Tarcza:;Scheibe:;Rondelle:;Arandela:;垫圈:;وردة:
+washer_radius;Washer Radius;Promień Tarczy;Scheibenradius;Rayon Rondelle;Radio Arandela;垫圈半径;نصف قطر الوردة
+washer_height;Washer Height;Wysokość Tarczy;Scheibenhöhe;Hauteur Rondelle;Altura Arandela;垫圈高度;سمك الوردة
+op_generate;GENERATE SET;GENERUJ ZESTAW;SATZ GENERIEREN;GÉNÉRER L'ENSEMBLE;GENERAR CONJUNTO;生成组件;إنشاء المجموعة
