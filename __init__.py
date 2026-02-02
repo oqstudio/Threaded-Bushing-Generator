@@ -390,7 +390,7 @@ class MECH_FINAL_PT_Panel(bpy.types.Panel):
         pcoll = preview_collections.get("main")
         if pcoll and "my_logo" in pcoll:
             row = l.row(); row.alignment = 'CENTER'
-            row.template_icon(icon_value=pcoll["my_logo"].icon_id, scale=8.0)
+            row.template_icon(icon_value=pcoll["my_logo"].icon_id, scale=4.0)
             l.separator()
 
         # LANGUAGE SWITCH
@@ -452,3 +452,4 @@ if __name__ == "__main__":
     except: pass
 
     register()
+
