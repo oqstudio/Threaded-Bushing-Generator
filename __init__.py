@@ -32,7 +32,7 @@ def load_data_from_csv():
     """
     global TRANSLATIONS, LANG_ENUM_ITEMS
     
-    csv_path = os.path.join(os.path.dirname(__file__), "slownik.csv")
+    csv_path = os.path.join(os.path.dirname(__file__), "lang.csv")
     TRANSLATIONS = {}
     LANG_ENUM_ITEMS = []
     
@@ -361,7 +361,7 @@ class MECH_FINAL_Preferences(bpy.types.AddonPreferences):
         box.label(text="Professional parametric tool for generating threaded bushings, bolts, and nuts.")
         box.label(text="Features precise control over thread pitch, clearance, diameter, and washer dimensions.")
         # Usunąłem stąd listę języków. 
-        box.label(text="Languages are detected automatically from slownik.csv.")
+        box.label(text="Languages are detected automatically from lang.csv.")
         box.separator()
         box.label(text="To use: Go to 3D View > Sidebar (N) > Generator tab.")
 
@@ -452,4 +452,5 @@ if __name__ == "__main__":
     except: pass
 
     register()
+
 
