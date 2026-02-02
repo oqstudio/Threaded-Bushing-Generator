@@ -68,7 +68,7 @@ Stop modeling threads manually! Generate complex mechanical assemblies with a si
 
 ## 🌍 Supported Languages
 
-The add-on features a dynamic CSV-based translation system (`slownik.csv`). Currently supported:
+The add-on features a dynamic CSV-based translation system (`lang.csv`). Currently supported:
 
 * 🇺🇸 English (Default)
 * 🇵🇱 Polski (Polish)
@@ -103,7 +103,7 @@ The add-on features a dynamic CSV-based translation system (`slownik.csv`). Curr
 Contributions are welcome! If you want to add a new language or improve the code:
 
 1.  Fork the repository.
-2.  Edit `slownik.csv` (use UTF-8 encoding!) or modify `__init__.py`.
+2.  Edit `lang.csv` (use UTF-8 encoding!) or modify `__init__.py`.
 3.  Submit a Pull Request.
 
 ## 📄 License
