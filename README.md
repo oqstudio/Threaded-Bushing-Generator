@@ -23,6 +23,14 @@
 
 Stop modeling threads manually! Generate complex mechanical assemblies with a single click.
 
+## 📸 Screenshots
+
+![Generator Panel](assets/sc01.png)
+*Interface of the generator with language selection.*
+
+![Generated Bushing](assets/sc02.png)
+*Example of generated threaded parts.*
+
 ## ✨ Features
 
 * **Parametric Generation:** Adjust radius, height, thickness, and smoothness (segments).
