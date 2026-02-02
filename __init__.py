@@ -331,7 +331,7 @@ class MECH_FINAL_Props_v47(bpy.types.PropertyGroup):
         description="Select Panel Language / Wybierz język",
         items=get_languages_callback # Tu jest MAGIA - funkcja zamiast listy
     )
-    segments: bpy.props.IntProperty(name="Segments", default=64, min=8)
+    segments: bpy.props.IntProperty(name="Segments", default=64, min=16)
     radius: bpy.props.FloatProperty(name="Radius", default=40.0)
     height: bpy.props.FloatProperty(name="Height", default=50.0)
     thickness: bpy.props.FloatProperty(name="Thickness", default=2.0)
@@ -452,5 +452,6 @@ if __name__ == "__main__":
     except: pass
 
     register()
+
 
 
