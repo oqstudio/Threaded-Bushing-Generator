@@ -9,12 +9,13 @@ import tempfile
 
 bl_info = {
     "name": "Threaded Bushing Generator",
-    "author": "OQStudio",
+    "author": "OQStudio (https://oqstudio.github.io)",  # Trik: Adres widać obok autora
     "version": (1, 11),
     "blender": (4, 1, 0),
     "location": "View3D > Sidebar > Generator",
     "description": "Parametric generator for threaded bushings, bolts, and nuts.",
-    "doc_url": "https://oqstudio.github.io",
+    "doc_url": "https://github.com/oqstudio/Threaded-Bushing-Generator",
+    "tracker_url": "https://github.com/oqstudio/Threaded-Bushing-Generator/issues", # Nowy przycisk: Zgłoś błąd
     "category": "Mesh",
 }
 
@@ -449,4 +450,5 @@ def unregister():
 if __name__ == "__main__":
     try: unregister()
     except: pass
+
     register()
