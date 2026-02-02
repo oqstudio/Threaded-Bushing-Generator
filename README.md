@@ -26,28 +26,28 @@ Stop modeling threads manually! Generate complex mechanical assemblies with a si
 ## 📸 Gallery
 
 <details>
-  <summary><strong>👁️ Click here to view screenshots / Kliknij, aby zobaczyć galerię</strong></summary>
+  <summary><strong>👁️ Click here to view screenshots</strong></summary>
   <br>
   
   <table>
     <tr>
       <td align="center">
         <img src="assets/sc01.png" alt="Screenshot 1" width="100%">
-        <br><em>Main View</em>
+        <br><em>Screen 01</em>
       </td>
       <td align="center">
         <img src="assets/sc02.png" alt="Screenshot 2" width="100%">
-        <br><em>Generator Settings</em>
+        <br><em>Screen 02</em>
       </td>
     </tr>
     <tr>
       <td align="center">
         <img src="assets/sc03.png" alt="Screenshot 3" width="100%">
-        <br><em>Thread Details</em>
+        <br><em>Screen 03</em>
       </td>
       <td align="center">
         <img src="assets/sc04.png" alt="Screenshot 4" width="100%">
-        <br><em>Material Preview</em>
+        <br><em>Screen 04</em>
       </td>
     </tr>
   </table>
