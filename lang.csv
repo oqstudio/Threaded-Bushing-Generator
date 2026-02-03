@@ -12,3 +12,6 @@ label_washer;Washer:;Tarcza:;Scheibe:;Rondelle:;Arandela:;垫圈:;وردة:
 washer_radius;Washer Radius;Promień Tarczy;Scheibenradius;Rayon Rondelle;Radio Arandela;垫圈半径;نصف قطر الوردة
 washer_height;Washer Height;Wysokość Tarczy;Scheibenhöhe;Hauteur Rondelle;Altura Arandela;垫圈高度;سمك الوردة
 op_generate;GENERATE SET;GENERUJ ZESTAW;SATZ GENERIEREN;GÉNÉRER L'ENSEMBLE;GENERAR CONJUNTO;生成组件;إنشاء المجموعة
+global;Global Setings Fi / Thread;Ustawienia globalne Fi / Gwint;Globale Einstellungen Fi / Gewinde;Paramètres globaux Fi / Filetage;Configuración global Fi / Rosca;全局设置 Fi / 螺纹;الإعدادات العامة Fi / اللولب
+nut;internal part;Element wewnątrz;Innengewinde;partie interne;parte interna;内件;الجزء الداخلي
+bolt;external part;Element na zewnątrz;Außengewinde;partie externe;parte externa;外件;الجزء الخارجي

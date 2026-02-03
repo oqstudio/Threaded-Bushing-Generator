@@ -9,29 +9,24 @@ import tempfile
 
 bl_info = {
     "name": "Threaded Bushing Generator",
-    "author": "OQStudio (https://oqstudio.github.io)",  # Trik: Adres widać obok autora
-    "version": (1, 11),
+    "author": "OQStudio (https://oqstudio.github.io)",
+    "version": (1, 52), # Wersja finalna ze słownikiem nagłówków
     "blender": (4, 1, 0),
     "location": "View3D > Sidebar > Generator",
-    "description": "Parametric generator for threaded bushings, bolts, and nuts.",
+    "description": "Threaded Bushing Generator",
     "doc_url": "https://github.com/oqstudio/Threaded-Bushing-Generator",
-    "tracker_url": "https://github.com/oqstudio/Threaded-Bushing-Generator/issues", # Nowy przycisk: Zgłoś błąd
+    "tracker_url": "https://github.com/oqstudio/Threaded-Bushing-Generator/issues",
     "category": "Mesh",
 }
 
 # --- 0. ZMIENNE GLOBALNE ---
 TRANSLATIONS = {} 
-LANG_ENUM_ITEMS = [] # Tu dynamicznie trafi lista języków z CSV
+LANG_ENUM_ITEMS = [] 
 preview_collections = {}
 
 # --- FUNKCJE POMOCNICZE ---
-
 def load_data_from_csv():
-    """
-    Wczytuje CSV, priorytetowo traktując średnik (Excel PL).
-    """
     global TRANSLATIONS, LANG_ENUM_ITEMS
-    
     csv_path = os.path.join(os.path.dirname(__file__), "lang.csv")
     TRANSLATIONS = {}
     LANG_ENUM_ITEMS = []
@@ -40,50 +35,31 @@ def load_data_from_csv():
         LANG_ENUM_ITEMS = [('en_US', 'English (Default)', 'Default - File missing')]
         return
 
-    # Lista kodowań do sprawdzenia
     encodings_to_try = ['utf-8-sig', 'cp1250', 'utf-8']
-    
     file_content = None
     
-    # 1. Próba odczytu pliku
     for enc in encodings_to_try:
         try:
             with open(csv_path, 'r', encoding=enc) as f:
                 file_content = f.read()
-                # Jeśli plik pusty, idź dalej
                 if not file_content.strip(): continue
                 break
         except UnicodeDecodeError:
             continue
 
     if not file_content:
-        print("BŁĄD: Nie udało się odczytać pliku (pusty lub złe kodowanie).")
         LANG_ENUM_ITEMS = [('en_US', 'File Error', '')]
         return
 
-    # 2. Parsowanie z wymuszeniem średnika
     from io import StringIO
-    
-    # Najpierw próbujemy "na sztywno" średnik (dla polskiego Excela)
     try:
         f_mem = StringIO(file_content)
         reader = csv.DictReader(f_mem, delimiter=';')
         headers = [h for h in reader.fieldnames if h and h != 'KEY']
-        
-        # SPRAWDZENIE: Czy podział zadziałał?
-        # Jeśli headers jest pusty LUB pierwsza nazwa jest bardzo długa i ma w sobie przecinki
-        # to znaczy, że średnik nie zadziałał (może to plik z USA?)
-        if not headers or (len(headers) == 1 and ',' in headers[0]):
-            raise ValueError("Chyba to nie średnik...")
-            
-        # Jak przeszło, to używamy tego readera
-        # Musimy go przewinąć/stworzyć od nowa, bo już przeczytaliśmy nagłówki
+        if not headers or (len(headers) == 1 and ',' in headers[0]): raise ValueError()
         f_mem.seek(0)
         reader = csv.DictReader(f_mem, delimiter=';')
-        
     except:
-        # FALLBACK: Jak średnik zawiódł, próbujemy przecinek
-        print("Info: Średnik nie zadziałał, próbuję przecinek...")
         f_mem = StringIO(file_content)
         reader = csv.DictReader(f_mem, delimiter=',')
         headers = [h for h in reader.fieldnames if h and h != 'KEY']
@@ -92,43 +68,33 @@ def load_data_from_csv():
         LANG_ENUM_ITEMS = [('en_US', 'No Columns Found', '')]
         return
 
-    # 3. Budowanie listy języków
     for lang_code in headers:
-        # Usuwamy ewentualne białe znaki (spacje) z nazwy języka
         clean_code = lang_code.strip()
         LANG_ENUM_ITEMS.append((clean_code, clean_code, f"Language: {clean_code}"))
         TRANSLATIONS[clean_code] = {}
 
-    # 4. Wczytywanie słów
     for row in reader:
         if 'KEY' in row and row['KEY']:
-            key = row['KEY'].strip() # Usuwamy spacje z klucza
+            key = row['KEY'].strip()
             for lang_code in headers:
                 if row.get(lang_code):
                     clean_code = lang_code.strip()
                     TRANSLATIONS[clean_code][key] = row[lang_code]
 
 def get_languages_callback(self, context):
-    """Callback zwracający listę języków do panelu"""
     return LANG_ENUM_ITEMS
 
 def get_text(key, context):
-    """Funkcja tłumacząca"""
     try:
-        # Pobieramy wybrany język z właściwości sceny
-        lang_code = context.scene.mech_props_final_v47.language
+        lang_code = context.scene.mech_props_final_v52.language
     except:
-        # Jeśli coś nie tak, bierzemy pierwszy dostępny z listy
         lang_code = LANG_ENUM_ITEMS[0][0] if LANG_ENUM_ITEMS else 'en_US'
     
-    # Sprawdzamy czy mamy tłumaczenie
     if lang_code in TRANSLATIONS and key in TRANSLATIONS[lang_code]:
         return TRANSLATIONS[lang_code][key]
-    
     return key
 
 def load_icons():
-    """Ładuje logo z URL lub dysku"""
     pcoll = bpy.utils.previews.new()
     url = "https://oqstudio.github.io/logo.png"
     temp_dir = tempfile.gettempdir()
@@ -145,7 +111,7 @@ def load_icons():
             pcoll.load("my_logo", cached_logo_path, 'IMAGE')
             icon_loaded = True
     except:
-        pass # Cicho ignorujemy błąd sieci
+        pass 
 
     if not icon_loaded:
         icons_dir = os.path.join(os.path.dirname(__file__), "assets")
@@ -177,7 +143,7 @@ def setup_materials(obj):
 
 # --- 2. SETUP GWINTU ---
 def create_thread(name, parent_obj, radius, height, pitch, thickness, is_internal, segments, offset_z):
-    p_name = "Thread_Profile_Curve_v47"
+    p_name = "Thread_Profile_Curve_v52"
     if p_name in bpy.data.curves:
         bpy.data.curves.remove(bpy.data.curves[p_name], do_unlink=True)
     
@@ -245,25 +211,36 @@ def create_thread(name, parent_obj, radius, height, pitch, thickness, is_interna
 def build_part(name, x_pos, is_bolt, props):
     fi_user = props.radius 
     radius_outer_nut = fi_user / 2.0
-    th_wall = props.thickness 
-    cl = props.clearance       
-    t_s = props.thread_size    
-    nut_inner_wall_radius = radius_outer_nut - th_wall
+    
+    if is_bolt:
+        th_wall = props.bolt_thickness
+        h_t = props.bolt_height
+        h_w = props.bolt_washer_height
+        washer_r_extra = props.bolt_washer_radius
+    else:
+        th_wall = props.nut_thickness
+        h_t = props.nut_height
+        h_w = props.nut_washer_height
+        washer_r_extra = props.nut_washer_radius
+
+    cl = props.clearance        
+    t_s = props.thread_size     
+    seg = props.segments
+
+    nut_inner_wall_radius_ref = radius_outer_nut - props.nut_thickness 
     head_outer_radius_ref = radius_outer_nut 
 
     if not is_bolt:
         r_out = radius_outer_nut
-        r_in = nut_inner_wall_radius
+        r_in = radius_outer_nut - th_wall
         r_base_thread = r_in 
     else:
-        bolt_peak = nut_inner_wall_radius - cl
+        bolt_peak = nut_inner_wall_radius_ref - cl
         r_base_thread = bolt_peak - t_s
         r_out = r_base_thread
-        r_in = r_out - th_wall
+        r_in = r_out - th_wall 
         
-    r_wash = head_outer_radius_ref + props.washer_radius
-    h_t, h_w = props.height, props.washer_height
-    seg = props.segments
+    r_wash = head_outer_radius_ref + washer_r_extra
 
     if name in bpy.data.objects:
         bpy.data.objects.remove(bpy.data.objects[name], do_unlink=True)
@@ -321,25 +298,35 @@ def build_part(name, x_pos, is_bolt, props):
     bm.to_mesh(mesh)
     bm.free()
     for p in obj.data.polygons: p.use_smooth = False
+    
     create_thread(f"T_{name}", obj, r_base_thread, h_t, props.thread_pitch, t_s, not is_bolt, seg, h_w)
 
 # --- 4. PANEL I DANE ---
-class MECH_FINAL_Props_v47(bpy.types.PropertyGroup):
-    # Dynamiczny wybór języka
+class MECH_FINAL_Props_v52(bpy.types.PropertyGroup):
     language: bpy.props.EnumProperty(
         name="Language",
-        description="Select Panel Language / Wybierz język",
-        items=get_languages_callback # Tu jest MAGIA - funkcja zamiast listy
+        description="Select Panel Language",
+        items=get_languages_callback
     )
-    segments: bpy.props.IntProperty(name="Segments", default=64, min=16)
-    radius: bpy.props.FloatProperty(name="Radius", default=40.0)
-    height: bpy.props.FloatProperty(name="Height", default=50.0)
-    thickness: bpy.props.FloatProperty(name="Thickness", default=2.0)
+    # WSPÓLNE
+    segments: bpy.props.IntProperty(name="Segments", default=64, min=8)
+    radius: bpy.props.FloatProperty(name="Radius (Fi)", default=40.0)
+    
     thread_size: bpy.props.FloatProperty(name="Thread Size", default=3.0)
     thread_pitch: bpy.props.FloatProperty(name="Thread Pitch", default=5.0)
     clearance: bpy.props.FloatProperty(name="Clearance", default=0.2)
-    washer_radius: bpy.props.FloatProperty(name="Washer Radius", default=20.0)
-    washer_height: bpy.props.FloatProperty(name="Washer Height", default=5.0)
+
+    # NAKRĘTKA
+    nut_height: bpy.props.FloatProperty(name="Height", default=50.0)
+    nut_thickness: bpy.props.FloatProperty(name="Thickness", default=2.0)
+    nut_washer_radius: bpy.props.FloatProperty(name="Washer Radius", default=20.0)
+    nut_washer_height: bpy.props.FloatProperty(name="Washer Height", default=5.0)
+
+    # ŚRUBA
+    bolt_height: bpy.props.FloatProperty(name="Height", default=50.0)
+    bolt_thickness: bpy.props.FloatProperty(name="Thickness", default=2.0)
+    bolt_washer_radius: bpy.props.FloatProperty(name="Washer Radius", default=20.0)
+    bolt_washer_height: bpy.props.FloatProperty(name="Washer Height", default=5.0)
 
 # --- 5. PREFERENCJE ADDONA ---
 class MECH_FINAL_Preferences(bpy.types.AddonPreferences):
@@ -358,18 +345,13 @@ class MECH_FINAL_Preferences(bpy.types.AddonPreferences):
         
         box = layout.box()
         box.label(text="Description / Opis:")
-        box.label(text="Professional parametric tool for generating threaded bushings, bolts, and nuts.")
-        box.label(text="Features precise control over thread pitch, clearance, diameter, and washer dimensions.")
-        # Usunąłem stąd listę języków. 
-        box.label(text="Languages are detected automatically from lang.csv.")
-        box.separator()
-        box.label(text="To use: Go to 3D View > Sidebar (N) > Generator tab.")
+        box.label(text="Professional parametric tool.")
 
 class MECH_FINAL_OT_Execute(bpy.types.Operator):
     bl_idname = "mesh.mech_gen_exec_final"
     bl_label = "Generate" 
     def execute(self, context):
-        p = context.scene.mech_props_final_v47
+        p = context.scene.mech_props_final_v52
         build_part("Nakretka", 0, False, p)
         build_part("Sruba", -(p.radius * 2.5), True, p)
         for area in context.screen.areas:
@@ -377,13 +359,13 @@ class MECH_FINAL_OT_Execute(bpy.types.Operator):
         return {'FINISHED'}
 
 class MECH_FINAL_PT_Panel(bpy.types.Panel):
-    bl_idname = "MECH_GEN_PT_FinalPanel_v47"
+    bl_idname = "MECH_GEN_PT_FinalPanel_v52"
     bl_space_type, bl_region_type, bl_category = 'VIEW_3D', 'UI', 'Generator'
     bl_label = "Threaded Bushing"
 
     def draw(self, context):
         def msg(key): return get_text(key, context)
-        p = context.scene.mech_props_final_v47
+        p = context.scene.mech_props_final_v52
         l = self.layout
         
         # LOGO
@@ -393,65 +375,93 @@ class MECH_FINAL_PT_Panel(bpy.types.Panel):
             row.template_icon(icon_value=pcoll["my_logo"].icon_id, scale=4.0)
             l.separator()
 
-        # LANGUAGE SWITCH
+        # LANGUAGE
         row = l.row(align=True); row.alignment = 'RIGHT'
         row.prop(p, "language", text="") 
         l.separator()
 
-        # UI
-        l.label(text=msg("label_bushing"))
-        row = l.row(align=True)
-        row.label(icon='COLORSET_04_VEC'); row.prop(p, "radius", text=msg("radius")) 
-        row = l.row(align=True)
-        row.label(icon='COLORSET_04_VEC'); row.prop(p, "height", text=msg("height"))
-        row = l.row(align=True)
-        row.label(icon='COLORSET_06_VEC'); row.prop(p, "thickness", text=msg("thickness"))
-        l.prop(p, "segments", icon='STRANDS', text=msg("segments"))
-        l.separator()
+        # --- GLOBAL SETTINGS ---
+        # TUTAJ UŻYWAMY KLUCZA 'global' ZE SŁOWNIKA
+        box = l.box()
+        box.label(text=msg("global"), icon='WORLD')
         
-        l.label(text=msg("label_thread"))
-        row = l.row(align=True)
+        row = box.row(align=True)
+        row.label(icon='COLORSET_04_VEC'); row.prop(p, "radius", text=msg("radius"))
+        
+        row = box.row(align=True)
         row.label(icon='COLORSET_03_VEC'); row.prop(p, "thread_size", text=msg("thread_size"))
-        row = l.row(align=True)
+        row = box.row(align=True)
         row.label(icon='COLORSET_03_VEC'); row.prop(p, "thread_pitch", text=msg("thread_pitch"))
-        row = l.row(align=True)
+        row = box.row(align=True)
         row.label(icon='COLORSET_03_VEC'); row.prop(p, "clearance", text=msg("clearance"))
+        box.prop(p, "segments", icon='STRANDS', text=msg("segments"))
+        
         l.separator()
         
-        l.label(text=msg("label_washer"))
-        row = l.row(align=True)
-        row.label(icon='COLORSET_01_VEC'); row.prop(p, "washer_radius", text=msg("washer_radius"))
-        row = l.row(align=True)
-        row.label(icon='COLORSET_02_VEC'); row.prop(p, "washer_height", text=msg("washer_height"))
-        l.separator()
+        # --- NUT SETTINGS (Box 1) ---
+        # TUTAJ UŻYWAMY KLUCZA 'nut' ZE SŁOWNIKA
+        box_nut = l.box()
+        box_nut.label(text=msg("nut"), icon='MESH_CYLINDER')
         
-        l.operator("mesh.mech_gen_exec_final", icon='MOD_SCREW', text=msg("op_generate"))
+        row = box_nut.row(align=True)
+        row.label(icon='COLORSET_04_VEC'); row.prop(p, "nut_height", text=msg("height"))
+        row = box_nut.row(align=True)
+        row.label(icon='COLORSET_06_VEC'); row.prop(p, "nut_thickness", text=msg("thickness"))
+        
+        box_nut.separator()
+        box_nut.label(text=msg("label_washer"))
+        row = box_nut.row(align=True)
+        row.label(icon='COLORSET_01_VEC'); row.prop(p, "nut_washer_radius", text=msg("washer_radius"))
+        row = box_nut.row(align=True)
+        row.label(icon='COLORSET_02_VEC'); row.prop(p, "nut_washer_height", text=msg("washer_height"))
+
+        l.separator()
+
+        # --- BOLT SETTINGS (Box 2) ---
+        # TUTAJ UŻYWAMY KLUCZA 'bolt' ZE SŁOWNIKA
+        box_bolt = l.box()
+        box_bolt.label(text=msg("bolt"), icon='MOD_SCREW')
+        
+        row = box_bolt.row(align=True)
+        row.label(icon='COLORSET_04_VEC'); row.prop(p, "bolt_height", text=msg("height"))
+        row = box_bolt.row(align=True)
+        row.label(icon='COLORSET_06_VEC'); row.prop(p, "bolt_thickness", text=msg("thickness"))
+        
+        box_bolt.separator()
+        box_bolt.label(text=msg("label_washer"))
+        row = box_bolt.row(align=True)
+        row.label(icon='COLORSET_01_VEC'); row.prop(p, "bolt_washer_radius", text=msg("washer_radius"))
+        row = box_bolt.row(align=True)
+        row.label(icon='COLORSET_02_VEC'); row.prop(p, "bolt_washer_height", text=msg("washer_height"))
+
+        l.separator()
+
+        # --- GENERATE BUTTON (TERAZ NA DOLE) ---
+        row = l.row()
+        row.scale_y = 1.5
+        row.operator("mesh.mech_gen_exec_final", icon='MOD_SCREW', text=msg("op_generate"))
 
 def register():
     load_icons()
-    load_data_from_csv() # Wczytuje języki PRZED rejestracją klas
+    load_data_from_csv() 
     bpy.utils.register_class(MECH_FINAL_Preferences)
-    bpy.utils.register_class(MECH_FINAL_Props_v47)
+    bpy.utils.register_class(MECH_FINAL_Props_v52)
     bpy.utils.register_class(MECH_FINAL_OT_Execute)
     bpy.utils.register_class(MECH_FINAL_PT_Panel)
-    bpy.types.Scene.mech_props_final_v47 = bpy.props.PointerProperty(type=MECH_FINAL_Props_v47)
+    bpy.types.Scene.mech_props_final_v52 = bpy.props.PointerProperty(type=MECH_FINAL_Props_v52)
 
 def unregister():
     for pcoll in preview_collections.values():
         bpy.utils.previews.remove(pcoll)
     preview_collections.clear()
     bpy.utils.unregister_class(MECH_FINAL_Preferences)
-    bpy.utils.unregister_class(MECH_FINAL_Props_v47)
+    bpy.utils.unregister_class(MECH_FINAL_Props_v52)
     bpy.utils.unregister_class(MECH_FINAL_OT_Execute)
     bpy.utils.unregister_class(MECH_FINAL_PT_Panel)
-    if hasattr(bpy.types.Scene, "mech_props_final_v47"):
-        del bpy.types.Scene.mech_props_final_v47
+    if hasattr(bpy.types.Scene, "mech_props_final_v52"):
+        del bpy.types.Scene.mech_props_final_v52
 
 if __name__ == "__main__":
     try: unregister()
     except: pass
-
     register()
-
-
-
