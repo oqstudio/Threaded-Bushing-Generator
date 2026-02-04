@@ -344,7 +344,7 @@ class MECH_FINAL_Preferences(bpy.types.AddonPreferences):
         layout.separator()
         
         box = layout.box()
-        box.label(text="Description / Opis:")
+        box.label(text="Description:")
         box.label(text="Professional parametric tool.")
 
 class MECH_FINAL_OT_Execute(bpy.types.Operator):
@@ -464,4 +464,5 @@ def unregister():
 if __name__ == "__main__":
     try: unregister()
     except: pass
+
     register()
